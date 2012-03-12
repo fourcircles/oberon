@@ -8,8 +8,16 @@ import org.antlr.runtime.tree.CommonTree;
 
 
 public class Main {
+	private OberonParser currentParser = null;
+	
+	
+	public String getErrorMessage(RecognitionException e) {
+//		String foo = currentParser.getErrorMessage(e, currentParser.getTokenNames());
+		return "line: " + e.line + " : " + 
+			currentParser.getErrorMessage(e, currentParser.getTokenNames()); 
+	}
 
-	public int parse(String filePath) throws IOException{
+	public int parse(String filePath) throws IOException, RecognitionException{
 		CharStream input = null;
 		try {
 			input = new ANTLRFileStream(filePath);
@@ -21,10 +29,8 @@ public class Main {
 		OberonLexer lex = new OberonLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lex);
 		OberonParser parser = new OberonParser(tokens);
-		try {
-			parser.obmodule();
-		} catch (RecognitionException e) {
-		}
+		currentParser = parser;
+		parser.obmodule();
 		
 		return parser.getErrorCount();
 	}

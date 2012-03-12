@@ -13,9 +13,10 @@ public class TestParser {
 		Main m = new Main();
 		try {
 			int foo = m.parse("tests\\test1.txt");
-			assertEquals(1, foo);
 		} catch (IOException e) {
 			fail("test\\test1.txt not found");
+		} catch (RecognitionException e) {
+			//success
 		}
 		
 	}

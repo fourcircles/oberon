@@ -19,6 +19,12 @@ public int getErrorCount() {
 }
 }
 
+@rulecatch {
+catch (RecognitionException e) {
+	throw e;
+}
+}
+
 
 obmodule: {errors_cnt = 0;}  'MODULE' IDENT SEMICOLON  (importList)? declarationSequence
     ('BEGIN' statementSequence)? 'END' IDENT DOT ;
