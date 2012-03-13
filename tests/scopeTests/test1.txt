@@ -1,0 +1,3 @@
+MODULE M;
+VAR a, a :INTEGER;
+END M.

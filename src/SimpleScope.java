@@ -4,11 +4,28 @@ import java.util.Map;
 
 
 public class SimpleScope {
+	static public SimpleScope globalScope = null;
+	static {
+		globalScope = new SimpleScope();
+		globalScope.parentScope = null;
+		
+		globalScope.addVar(new SimpleVar("INTEGER"));
+		//TODO add everything else
+		
+	}
 
 	ArrayList<SimpleVar> varList;
 	Map<String, SimpleVar> varMap; 
 	
 	SimpleScope parentScope;
+	
+	
+	public SimpleScope getParentScope() {
+		return parentScope;
+	}
+	public void setParentScope(SimpleScope parentScope) {
+		this.parentScope = parentScope;
+	}
 	
 	public SimpleScope() {
 		varList = new ArrayList<SimpleVar>();
@@ -19,17 +36,17 @@ public class SimpleScope {
 		varMap.put(var.getName(), var);
 	}
 	
-	public SimpleVar findInside(String name) {
-		return varMap.get(name);
+	public boolean containsInside(String name) {
+		return varMap.containsKey(name);
 	}
-	public SimpleVar findAnywhere(String name) {
-		SimpleVar inside = findInside(name);
-		if (inside == null) {
+	public boolean contains(String name) {
+		boolean inside = containsInside(name);
+		if (!inside) {
 			if (parentScope != null) { 
-				return parentScope.findAnywhere(name);
-			} else return null;
+				return parentScope.contains(name);
+			} else return false;
 		} 
-		return inside;
+		return true;
 	}
 	
 }

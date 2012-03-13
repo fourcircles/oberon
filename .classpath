@@ -3,9 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="antlrGenerated"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="var" path="ANTLR_HOME/junit.jar"/>
 	<classpathentry kind="var" path="ANTLR_HOME/antlrworks-1.4.2.jar"/>
-	<classpathentry kind="var" path="GIT_SSH"/>
-	<classpathentry kind="var" path="ANTLR_HOME/hamcrest-core-1.3.0RC2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
