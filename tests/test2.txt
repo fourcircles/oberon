@@ -1,0 +1,3 @@
+MODULE M;
+VAR i, j, k : INTEGER;
+END.

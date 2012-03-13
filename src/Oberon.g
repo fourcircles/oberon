@@ -4,29 +4,36 @@ grammar Oberon;
 options {
   language = Java;
   output = AST;
-//  backtrack = true;
 }
 @members {
-int errors_cnt = 0;
-public void reportError(RecognitionException e)
-{
-  errors_cnt++;
-  super.reportError(e);
-//  TODO e.toString();
+protected void mismatch(IntStream input, int ttype, BitSet follow) 
+	throws RecognitionException {
+	throw new MismatchedTokenException(ttype, input); 
 }
-public int getErrorCount() {
-  return errors_cnt;
+public Object recoverFromMismatchedSet(IntStream input, 
+	RecognitionException e, BitSet follow) throws RecognitionException{
+	throw e;
 }
+protected Object recoverFromMismatchedToken (IntStream input, int ttype, BitSet follow) 
+	throws RecognitionException {
+	throw new MismatchedTokenException(ttype, input);
 }
+
+}
+
 
 @rulecatch {
 catch (RecognitionException e) {
+//	reportError(e);
+//	recover(input, e);
 	throw e;
 }
 }
 
 
-obmodule: {errors_cnt = 0;}  'MODULE' IDENT SEMICOLON  (importList)? declarationSequence
+
+
+obmodule: {}  'MODULE' IDENT SEMICOLON  (importList)? declarationSequence
     ('BEGIN' statementSequence)? 'END' IDENT DOT ;
 
 identdef : IDENT (STAR)? ;
@@ -34,6 +41,8 @@ qualident : (IDENT '.')? IDENT;
 constantDeclaration  :  identdef EQUAL constExpression;
 constExpression  :  expression;
 typeDeclaration  :  identdef EQUAL type;
+
+//qualident only for TYPE a = b and basic types
 type  :  qualident | arrayType | procedureType;
 arrayType  :  'ARRAY' length 'OF' type;
 length  :  constExpression;
@@ -115,10 +124,17 @@ TILDE : '~' ;
 STROKE : '|' ;
 ASSIGN : ':=' ;
 
-STRING : '\"' 'a' '\"' ;
-CharConstant : '\'' 'a' '\'';
+STRING : '\"' .+ '\"' ;
+CharConstant : '\'' . '\'' | DIGIT HEX_DIGIT* 'X';
 IDENT : LETTER ( LETTER | DIGIT) * ;
-NUMBER : DIGIT ( DIGIT ) +;
+//NUMBER : INTEGER | REAL;
+NUMBER : ( DIGIT ) + REAL_PART? | DIGIT (HEX_DIGIT) + 'H';
+
+//INTEGER : DIGIT ( DIGIT ) + | DIGIT (HEX_DIGIT) + 'H';
+//REAL : DIGIT ( DIGIT ) + '.' DIGIT * (SCALE)?;
+REAL_PART: '.' DIGIT * (SCALE)?;
+SCALE : ('E' | 'D') ('+' | '-')? DIGIT (DIGIT)+;
+fragment HEX_DIGIT : DIGIT | 'A'..'F';
 fragment DIGIT : '0' .. '9' ;
-fragment LETTER : 'A' .. 'Z' | 'a' .. 'z' | '_' ;
+fragment LETTER : 'A' .. 'Z' | 'a' .. 'z';
 WHITESPACE: (' ' | '\t' | '\n' | '\r' | '\u000C')+ {$channel=HIDDEN;};

@@ -12,12 +12,11 @@ public class Main {
 	
 	
 	public String getErrorMessage(RecognitionException e) {
-//		String foo = currentParser.getErrorMessage(e, currentParser.getTokenNames());
 		return "line: " + e.line + " : " + 
 			currentParser.getErrorMessage(e, currentParser.getTokenNames()); 
 	}
 
-	public int parse(String filePath) throws IOException, RecognitionException{
+	public void parse(String filePath) throws IOException, RecognitionException{
 		CharStream input = null;
 		try {
 			input = new ANTLRFileStream(filePath);
@@ -28,24 +27,16 @@ public class Main {
 
 		OberonLexer lex = new OberonLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lex);
-		OberonParser parser = new OberonParser(tokens);
-		currentParser = parser;
-		parser.obmodule();
-		
-		return parser.getErrorCount();
+		currentParser = new OberonParser(tokens);
+		currentParser.obmodule();
 	}
 	public static void main(String[] args) throws RecognitionException, IOException{
 		Main m = new Main();
 		try {
 			m.parse(args[0]);
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("Give arguments");
+			System.out.println("One argument with file name expected");
 		}
-		
-		
-//		BaseParser.program_return preturn = parser.program();
-//		CommonTree tree = (CommonTree)preturn.getTree();
-//		System.out.println(tree.toStringTree());
 	}
 
 }
