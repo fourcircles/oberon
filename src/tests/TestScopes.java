@@ -12,6 +12,7 @@ import org.junit.Test;
 import core.Main;
 
 import exceptions.AmbiguousIdException;
+import exceptions.MissingVariableException;
 
 
 public class TestScopes {
@@ -84,7 +85,35 @@ public class TestScopes {
 	public void test6() {
 		String filename = makeFilename(testsPath, 6);
 		runParse(m, filename);
-		
+		printErrorMessage(m, 0);
 		onlyOneException(m, AmbiguousIdException.class);
 	}
+	
+	@Test
+	//access to variables declared outside and inside procedure 
+	public void test7() {
+		String filename = makeFilename(testsPath, 7);
+		runParse(m, filename);
+
+		assertEquals(0, m.getErrorCount());
+	}
+	
+	@Test
+	//single undeclared variable inside procedure 
+	public void test8() {
+		String filename = makeFilename(testsPath, 8);
+		runParse(m, filename);
+
+		onlyOneException(m, MissingVariableException.class);
+	}
+	
+	@Test
+	//access to variables declared outside and inside procedure 
+	public void test9() {
+		String filename = makeFilename(testsPath, 9);
+		runParse(m, filename);
+
+		assertEquals(0, m.getErrorCount());
+	}
+	
 }

@@ -18,22 +18,10 @@ package generated;
 int errorCnt;
 ArrayList<RecognitionException> errors;
 
-//protected void mismatch(IntStream input, int ttype, BitSet follow) 
-//	throws RecognitionException {
-//	throw new MismatchedTokenException(ttype, input); 
-//}
-//public Object recoverFromMismatchedSet(IntStream input, 
-//	RecognitionException e, BitSet follow) throws RecognitionException{
-//	throw e;
-//}
-//protected Object recoverFromMismatchedToken (IntStream input, int ttype, BitSet follow) 
-//	throws RecognitionException {
-//	throw new MismatchedTokenException(ttype, input);
-//	
-//}
 public int getErrorsNumber() {
 return errors.size();
 }
+
 public ArrayList<RecognitionException> getErrors() {
 return errors;
 }
@@ -41,8 +29,6 @@ return errors;
 public void reportError(RecognitionException e) {
 
 errors.add(new RRException(e, getErrorMessage(e, tokenNames)));
-//System.err.println(e.getMessage());
-//System.out.println(getErrorMessage(e, tokenNames));
 }
 
 public void reportMissingVar(String id, int line, int pos) {
@@ -55,14 +41,20 @@ AmbiguousIdException e = new AmbiguousIdException(id, line, pos);
 errors.add(e);
 //reportError(e);
 }
+public void reportRepeatDeclaration(Token token, SimpleScope scope) {
+AmbiguousIdException e = new AmbiguousIdException(token, scope);
+errors.add(e);
+//reportError(e);
+}
+
 
 SimpleScope currentScope;
 
 public void checkScope(Token id, SimpleScope currentScope) {
 if (currentScope.containsInside(id.getText())) {
-  reportRepeatDeclaration(id.getText(), id.getLine(), id.getCharPositionInLine());
+	reportRepeatDeclaration(id, currentScope);
 } else {
-	currentScope.addVar(new SimpleVar(id.getText()));
+	currentScope.addVar(new SimpleVar(id));
 }
 
 }

@@ -1,29 +1,32 @@
 package core;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class SimpleScope {
-//	static public SimpleScope globalScope = null;
-//	static {
-//		globalScope = new SimpleScope();
-//		globalScope.parentScope = null;
-//		
-//		globalScope.addVar(new SimpleVar("INTEGER"));
-//		//TODO add everything else
-//		
-//	}
-
+	class Ints {
+		int a;
+		int b;
+	}
 	ArrayList<SimpleVar> varList;
-	Map<String, SimpleVar> varMap; 
+	Map<String, SimpleVar> varMap;
+	
 	
 	SimpleScope parentScope;
+	
+//	private List<String> defaultVars = new ArrayList<String>("INTEGER");
+	static private String[] defaultVars = 
+		{"INTEGER", "REAL", "BOOLEAN", "CHAR", "BYTE", "SHORTINT", "LONGINT", "LONGREAL"};
 	
 	static public SimpleScope getNewGlobalScope() {
 		SimpleScope sc = new SimpleScope();
 		sc.parentScope = null;
-		sc.addVar(new SimpleVar("INTEGER"));
+		for (String var : defaultVars) {
+			sc.addVar(new SimpleVar(var));
+		}
+//		sc.addVar(new SimpleVar("INTEGER"));
 		return sc;
 	}
 	public SimpleScope getParentScope() {
@@ -43,16 +46,24 @@ public class SimpleScope {
 	}
 	
 	public boolean containsInside(String name) {
-		return varMap.containsKey(name);
+		return varMap.get(name) != null;
 	}
 	public boolean contains(String name) {
-		boolean inside = containsInside(name);
-		if (!inside) {
-			if (parentScope != null) { 
-				return parentScope.contains(name);
-			} else return false;
-		} 
-		return true;
+		return get(name) != null;
 	}
+	
+	public SimpleVar getInside(String name) {
+		return varMap.get(name);
+	}
+	public SimpleVar get(String name) {
+		SimpleVar v = getInside(name);
+		if (v != null)
+			return v;
+		if (parentScope != null)
+			return parentScope.get(name);
+		
+		return null;
+	}
+	
 	
 }
