@@ -57,7 +57,8 @@ errors.add(e);
 }
 
 SimpleScope currentScope;
-public void checkOrAddVar(Token id, SimpleScope currentScope) {
+
+public void checkScope(Token id, SimpleScope currentScope) {
 if (currentScope.containsInside(id.getText())) {
   reportRepeatDeclaration(id.getText(), id.getLine(), id.getCharPositionInLine());
 } else {
@@ -84,11 +85,7 @@ errors = new ArrayList<RecognitionException>();
 
 identdef
 @after {
-if (currentScope.containsInside($id.text)) {
-  reportRepeatDeclaration($id.text, $id.line, $id.pos);
-} else {
-	currentScope.addVar(new SimpleVar($id.text));
-}
+checkScope($id, currentScope);
 } 
 	: id=IDENT (STAR)?;
 
@@ -149,24 +146,29 @@ forStatement : 'FOR' IDENT ASSIGN expression 'TO' expression ('BY' expression)?
 
 procedureDeclaration  
   :
-{
-SimpleScope prevScope = currentScope;
-currentScope = new SimpleScope();
-currentScope.setParentScope(prevScope);
-}
   procedureHeading SEMICOLON procedureBody IDENT
 {
 currentScope = currentScope.getParentScope();
 };
 procedureHeading  :  'PROCEDURE' identdef (formalParameters)?;
 procedureBody  :  declarationSequence ('BEGIN' statementSequence)? 'END';
+
+//TODO forward declaration
 forwardDeclaration  :  'PROCEDURE' '^' IDENT (STAR)? (formalParameters)?;
-declarationSequence  :  ('CONST' (constantDeclaration SEMICOLON)* |
+
+declarationSequence
+	:  ('CONST' (constantDeclaration SEMICOLON)* |
     'TYPE' (typeDeclaration SEMICOLON)* | 'VAR' (variableDeclaration SEMICOLON)*)*
     (procedureDeclaration SEMICOLON | forwardDeclaration SEMICOLON)*;
     
-formalParameters  :  LPAREN (fPSection (SEMICOLON fPSection)*)? RPAREN (COLON qualident)?;
-fPSection  :  ('VAR')? IDENT {} (COMMA IDENT)* COLON formalType;
+formalParameters
+@init {
+SimpleScope prevScope = currentScope;
+currentScope = new SimpleScope();
+currentScope.setParentScope(prevScope);
+}  
+  	:  LPAREN (fPSection (SEMICOLON fPSection)*)? RPAREN (COLON qualident)?;
+fPSection  :  ('VAR')? id1=IDENT {checkScope($id1, currentScope);} (COMMA id2=IDENT{checkScope($id2, currentScope);})* COLON formalType;
 
 formalType  :  ('ARRAY' 'OF')? (qualident | procedureType);
 importList  :  'IMPORT' obimport (COMMA obimport)* SEMICOLON ;
