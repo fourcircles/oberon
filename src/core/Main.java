@@ -1,4 +1,10 @@
+package core;
+
+import generated.OberonLexer;
+import generated.OberonParser;
+
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.CharStream;
@@ -11,19 +17,22 @@ public class Main {
 	private OberonParser currentParser = null;
 	
 	
-	public String getErrorMessage(RecognitionException e) {
-		return "line: " + e.line + " : " + 
-			currentParser.getErrorMessage(e, currentParser.getTokenNames()); 
+//	public String getErrorMessage(RecognitionException e) {
+//		return "line: " + e.line + " : " + 
+//			currentParser.getErrorMessage(e, currentParser.getTokenNames()); 
+//	}
+	
+	public int getErrorCount() {
+		return currentParser.getErrorsNumber();
+	}
+	
+	public ArrayList<RecognitionException> getErrors() {
+		return currentParser.getErrors();
 	}
 
 	public void parse(String filePath) throws IOException, RecognitionException{
 		CharStream input = null;
-		try {
-			input = new ANTLRFileStream(filePath);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw e;
-		}
+		input = new ANTLRFileStream(filePath);
 
 		OberonLexer lex = new OberonLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lex);

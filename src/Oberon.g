@@ -4,68 +4,101 @@ options {
   language = Java;
   output = AST;
 }
-@headers {
-
+@header {
+package generated;
+import java.util.ArrayList;
+import exceptions.*;
+import core.*;
+}
+@lexer::header {
+package generated;
 }
 @members {
 
 int errorCnt;
-protected void mismatch(IntStream input, int ttype, BitSet follow) 
-	throws RecognitionException {
-	throw new MismatchedTokenException(ttype, input); 
+ArrayList<RecognitionException> errors;
+
+//protected void mismatch(IntStream input, int ttype, BitSet follow) 
+//	throws RecognitionException {
+//	throw new MismatchedTokenException(ttype, input); 
+//}
+//public Object recoverFromMismatchedSet(IntStream input, 
+//	RecognitionException e, BitSet follow) throws RecognitionException{
+//	throw e;
+//}
+//protected Object recoverFromMismatchedToken (IntStream input, int ttype, BitSet follow) 
+//	throws RecognitionException {
+//	throw new MismatchedTokenException(ttype, input);
+//	
+//}
+public int getErrorsNumber() {
+return errors.size();
 }
-public Object recoverFromMismatchedSet(IntStream input, 
-	RecognitionException e, BitSet follow) throws RecognitionException{
-	throw e;
-}
-protected Object recoverFromMismatchedToken (IntStream input, int ttype, BitSet follow) 
-	throws RecognitionException {
-	throw new MismatchedTokenException(ttype, input);
-	
+public ArrayList<RecognitionException> getErrors() {
+return errors;
 }
 
-public void reportMissingVar(String id) {
-errorCnt++;
-reportError(new MissingVariableException(id));
-}
-public void reportRepeatDeclaration(String id) {
-errorCnt++;
-reportError(new AmbiguousId(id));
+public void reportError(RecognitionException e) {
 
+errors.add(new RRException(e, getErrorMessage(e, tokenNames)));
+//System.err.println(e.getMessage());
+//System.out.println(getErrorMessage(e, tokenNames));
+}
+
+public void reportMissingVar(String id, int line, int pos) {
+MissingVariableException e = new MissingVariableException(id, line, pos);
+errors.add(e);
+//reportError(new MissingVariableException(id, line, pos));
+}
+public void reportRepeatDeclaration(String id, int line, int pos) {
+AmbiguousIdException e = new AmbiguousIdException(id, line, pos);
+errors.add(e);
+//reportError(e);
 }
 
 SimpleScope currentScope;
-}
-
-
-@rulecatch {
-catch (RecognitionException e) {
-//	reportError(e);
-//	recover(input, e);
-	throw e;
-}
-}
-
-
-
-
-obmodule: {currentScope = SimpleScope.globalScope; errorCnt = 0;}  'MODULE' IDENT SEMICOLON  (importList)? declarationSequence
-    ('BEGIN' statementSequence)? 'END' IDENT DOT ;
-
-identdef : id=IDENT (STAR)? {
-if (currentScope.containsInside($id.text)) {
-  reportRepeatDeclaration($id.text);
+public void checkOrAddVar(Token id, SimpleScope currentScope) {
+if (currentScope.containsInside(id.getText())) {
+  reportRepeatDeclaration(id.getText(), id.getLine(), id.getCharPositionInLine());
 } else {
-currentScope.addVar(new SimpleVar($id.text));
+	currentScope.addVar(new SimpleVar(id.getText()));
 }
-};
-qualident 
-  : (IDENT '.')? id=IDENT 
-  {
+
+}
+}
+
+
+
+
+
+
+obmodule
+@init {
+currentScope = SimpleScope.getNewGlobalScope();
+errorCnt = 0;
+errors = new ArrayList<RecognitionException>();
+}
+	: 'MODULE' IDENT SEMICOLON  (importList)? declarationSequence
+    ('BEGIN' statementSequence)? 'END' IDENT DOT
+    ;
+
+identdef
+@after {
+if (currentScope.containsInside($id.text)) {
+  reportRepeatDeclaration($id.text, $id.line, $id.pos);
+} else {
+	currentScope.addVar(new SimpleVar($id.text));
+}
+} 
+	: id=IDENT (STAR)?;
+
+qualident
+@after { 
   if (currentScope.contains($id.text)) {
     //OK
-  } else {reportMissingVar($id.text);}
-  }
+  } else reportMissingVar($id.text, $id.line, $id.pos);
+}
+  : (IDENT '.')? id=IDENT 
   ;
 constantDeclaration  :  identdef EQUAL constExpression;
 constExpression  :  expression;
@@ -78,7 +111,7 @@ length  :  constExpression;
 baseType  :  qualident;
 identList  :  identdef (COMMA identdef)*;
 procedureType : 'PROCEDURE' (formalParameters)?;
-variableDeclaration  : {} identList COLON type;
+variableDeclaration  : identList COLON type;
 
 designator  :  qualident (LBR expression RBR)?;
 expList  :  expression (COMMA expression)*;
@@ -131,8 +164,10 @@ forwardDeclaration  :  'PROCEDURE' '^' IDENT (STAR)? (formalParameters)?;
 declarationSequence  :  ('CONST' (constantDeclaration SEMICOLON)* |
     'TYPE' (typeDeclaration SEMICOLON)* | 'VAR' (variableDeclaration SEMICOLON)*)*
     (procedureDeclaration SEMICOLON | forwardDeclaration SEMICOLON)*;
+    
 formalParameters  :  LPAREN (fPSection (SEMICOLON fPSection)*)? RPAREN (COLON qualident)?;
-fPSection  :  ('VAR')? IDENT (COMMA IDENT)* COLON formalType;
+fPSection  :  ('VAR')? IDENT {} (COMMA IDENT)* COLON formalType;
+
 formalType  :  ('ARRAY' 'OF')? (qualident | procedureType);
 importList  :  'IMPORT' obimport (COMMA obimport)* SEMICOLON ;
 obimport  :  IDENT;

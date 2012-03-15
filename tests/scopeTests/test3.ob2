@@ -1,6 +1,5 @@
 MODULE M;
 VAR proc : INTEGER;
 PROCEDURE p(proc : INTEGER);
-BEGIN
 END p;
 END M.

@@ -1,25 +1,31 @@
+package core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class SimpleScope {
-	static public SimpleScope globalScope = null;
-	static {
-		globalScope = new SimpleScope();
-		globalScope.parentScope = null;
-		
-		globalScope.addVar(new SimpleVar("INTEGER"));
-		//TODO add everything else
-		
-	}
+//	static public SimpleScope globalScope = null;
+//	static {
+//		globalScope = new SimpleScope();
+//		globalScope.parentScope = null;
+//		
+//		globalScope.addVar(new SimpleVar("INTEGER"));
+//		//TODO add everything else
+//		
+//	}
 
 	ArrayList<SimpleVar> varList;
 	Map<String, SimpleVar> varMap; 
 	
 	SimpleScope parentScope;
 	
-	
+	static public SimpleScope getNewGlobalScope() {
+		SimpleScope sc = new SimpleScope();
+		sc.parentScope = null;
+		sc.addVar(new SimpleVar("INTEGER"));
+		return sc;
+	}
 	public SimpleScope getParentScope() {
 		return parentScope;
 	}
