@@ -85,7 +85,6 @@ public class TestScopes {
 	public void test6() {
 		String filename = makeFilename(testsPath, 6);
 		runParse(m, filename);
-		printErrorMessage(m, 0);
 		onlyOneException(m, AmbiguousIdException.class);
 	}
 	

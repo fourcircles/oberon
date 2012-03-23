@@ -36,11 +36,6 @@ MissingVariableException e = new MissingVariableException(id, line, pos);
 errors.add(e);
 //reportError(new MissingVariableException(id, line, pos));
 }
-public void reportRepeatDeclaration(String id, int line, int pos) {
-AmbiguousIdException e = new AmbiguousIdException(id, line, pos);
-errors.add(e);
-//reportError(e);
-}
 public void reportRepeatDeclaration(Token token, SimpleScope scope) {
 AmbiguousIdException e = new AmbiguousIdException(token, scope);
 errors.add(e);
